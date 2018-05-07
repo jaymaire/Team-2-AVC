@@ -6,12 +6,12 @@
 
 //turn the robot left using speed as the speed and the delay for howmany microseconds they are on
 
-int turn_left(int delay, int speed){
+int turn_left(int delayMicro, int delaySec, int speed){
 
 	set_motor (1, speed);
 	set_motor (2, (speed * -1));
 	
-	sleep1(0, delay);
+	sleep1(delaySec, delayMicro);
 	set_motor (1, 0);
 	set_motor (2, 0);
 	return 0;
@@ -19,7 +19,7 @@ int turn_left(int delay, int speed){
 
 //turn the robot right using speed as the speed and delay for how many microseconds they are on
 
-int turn_right(int delay, int speed){
+int turn_right(int delayMicro, int delaySec, int speed){
 
 	set_motor (1, (speed * -1));
 	set_motor (2, speed);
@@ -32,13 +32,14 @@ int turn_right(int delay, int speed){
 
 int main () {
 	int speed = 127;
-	int delay = 500000;
+	int delayMicro = 500000;
+	int delaySec = 1;
 	
 	init();
 	
-	trun_left(delay, speed);
+	trun_left(delayMicro, delaySec, speed);
 	sleep1(0, delay);
-	turn_right(delay, speed);
+	turn_right(delayMicro, delaySec, speed);
 }
 
 
