@@ -24,7 +24,7 @@ int turn_right(int delayMicro, int delaySec, int speed){
 	set_motor (1, (speed * -1));
 	set_motor (2, speed);
 	
-	sleep1(0, delay);
+	sleep1(delaySec, delayMicro);
 	set_motor (1, 0);
 	set_motor (2, 0);
 	return 0;
