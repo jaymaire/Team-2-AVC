@@ -16,7 +16,7 @@ int turn_left(int delay, int speed){
 	return 0;
 }
 
-//turn the robot left using speed as the speed and delay for how many microseconds they are on
+//turn the robot right using speed as the speed and delay for how many microseconds they are on
 int turn_right(int delay, int speed){
 	init();
 	set_motor (1, (speed * -1));
