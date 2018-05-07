@@ -5,34 +5,40 @@
 #include "E101.h"
 
 //turn the robot left using speed as the speed and the delay for howmany microseconds they are on
+
 int turn_left(int delay, int speed){
-	init();
+
 	set_motor (1, speed);
 	set_motor (2, (speed * -1));
 	
-	sleep(0, delay);
-	stop (1);
-	stop (2);
+	sleep1(0, delay);
+	set_motor (1, 0);
+	set_motor (2, 0);
 	return 0;
 }
 
 //turn the robot right using speed as the speed and delay for how many microseconds they are on
+
 int turn_right(int delay, int speed){
-	init();
+
 	set_motor (1, (speed * -1));
 	set_motor (2, speed);
 	
-	sleep(0, delay);
-	stop (1);
-	stop (2);
+	sleep1(0, delay);
+	set_motor (1, 0);
+	set_motor (2, 0);
 	return 0;
 }
 
 int main () {
 	int speed = 127;
 	int delay = 500000;
+	
+	init();
+	
 	trun_left(delay, speed);
-	turn_right(delay, speed)
+	sleep1(0, delay);
+	turn_right(delay, speed);
 }
 
 
