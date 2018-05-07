@@ -16,10 +16,22 @@ int turn_left(int delay, int speed){
 	return 0;
 }
 
+int turn_right(int delay, int speed){
+	init();
+	set_motor (1, (speed * -1));
+	set_motor (2, speed);
+	
+	sleep(0, delay);
+	stop (1);
+	stop (2);
+	return 0;
+}
+
 int main () {
 	int speed = 127;
 	int delay = 500000;
-	trun_left(delay);
+	trun_left(delay, speed);
+	turn_right(delay, speed)
 }
 
 
