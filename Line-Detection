@@ -1,0 +1,31 @@
+int line_detection (bool RunLine) {	
+
+	char White;
+	
+	char MinWhite = 100; // all values over this is considered white
+	
+	char WOrNot; // if the pixel is white its a 1 if not its a 0
+	
+	int LinePos; //if its a negative the line is left if positive the line is right
+	
+	int rows = 320;
+	int col = 240;
+	
+	while(RunLine == true){
+		int take_picture(); // takes the picture
+		for(int i=(rows/2)*-1; i <= rows/2; i++){ // the left half of the image is negative and the right is positive numbers
+			
+				White = char get_pixel(i, col/2, 3); // gets the luminosity
+				
+				if (White >= MinWhite) { //if the pixel is white
+					WOrNot = 1; //the pixel is white
+				} else { // if the pixel is not white
+					WOrNot = 0; //the pixel is not white
+				}
+				
+				LinePos = LinePos + (WorNot*i); //works out where the line is
+			}
+			return (LinePos); // returns if the line is left or right
+		}	
+
+	}
