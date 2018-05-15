@@ -1,0 +1,127 @@
+#include <stdio.h>
+#include <time.h>
+#include "E101.h"
+#include <iostream>
+using namespace std;
+
+
+
+int turn_left(int delayMicro, int delaySec, int speed){
+
+	set_motor (1, speed);
+	set_motor (2, (speed * -1));
+	
+	sleep1(delaySec, delayMicro);
+	set_motor (1,0);
+	set_motor (2,0);
+	return 0;
+}
+int turn_right(int delayMicro, int delaySec, int speed){
+
+	set_motor (1, (speed * -1));
+	set_motor (2, speed);
+	
+	sleep1(delaySec, delayMicro);
+	set_motor (1,0);
+	set_motor (2,0);
+	return 0;
+}
+int go_straight(int delayMicro, int delaySec, int speed){
+
+	set_motor (1, speed);
+	set_motor (2, speed);
+	
+	sleep1(delaySec, delayMicro);
+	set_motor (1,0);
+	set_motor (2,0);
+	return 0;
+}
+int line_detection () {	
+
+	int Red = 0;
+	int Green = 0;
+	int Blue = 0;
+	int White = 0;
+	
+	int MinWhite = 100; // all values over this is considered white
+	
+	int WOrNot; // if the pixel is white its a 1 if not its a 0
+	
+	int LinePos = 0; //if its a negative the line is left if positive the line is right
+	
+	int rows = 320;
+	int col = 240;
+	
+	int CI = 80;
+	int speed = 50;
+	int delayMicro = 10;
+	
+	
+	while(true){
+		
+		int take_picture(); // takes the picture
+		
+		for(int i=0; i < rows; i++){ // the left half of the image is negative and the right is positive numbers
+				
+				Red = get_pixel(col/2, i, 0); // gets the RED
+				Green = get_pixel(col/2, i, 1); // gets the GREEN
+				Blue = get_pixel(col/2, i, 2); // gets the BLUE
+				
+				White = (Red + Green + Blue)/3;
+				
+				if (White >= MinWhite) { //if the pixel is white
+					
+					WOrNot = 1; //the pixel is white
+					
+				} else { // if the pixel is not white
+					
+					WOrNot = 0; //the pixel is not white
+				}
+				
+				if (i < rows/2) {
+					
+					LinePos += WOrNot;
+					
+				} else {
+					
+					LinePos -= WOrNot;
+					
+				}
+				
+				//cout << "INDEX Pos: " << i << "\n";
+				//cout << " WHITE Value: " << White << "\n";
+				
+				
+			}
+			cout << "Line Pos: " << LinePos << "\n";
+			
+			if (LinePos > CI) {
+				turn_right(delayMicro, 0, speed);
+				sleep1(delayMicro,0);
+			} else if (LinePos < (CI*-1)) {
+				turn_left(delayMicro, 0, speed);
+				sleep1(delayMicro,0);
+			} else {
+				go_straight(delayMicro, 0, speed);
+				sleep1(delayMicro,0);
+			}
+			
+			LinePos = 0;
+			
+		}
+		return(0);	
+
+	}
+int main () {
+	
+
+
+	init();
+
+	take_picture();
+	
+	line_detection();
+	
+	
+}
+
