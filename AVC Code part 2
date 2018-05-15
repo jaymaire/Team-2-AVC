@@ -9,7 +9,7 @@ using namespace std;
 int turn_left(int delayMicro, int delaySec, int speed){
 
 	set_motor (1, speed);
-	set_motor (2, (speed * -1));
+	set_motor (2, (speed/2));
 	
 	sleep1(delaySec, delayMicro);
 	set_motor (1,0);
@@ -18,7 +18,7 @@ int turn_left(int delayMicro, int delaySec, int speed){
 }
 int turn_right(int delayMicro, int delaySec, int speed){
 
-	set_motor (1, (speed * -1));
+	set_motor (1, (speed/2));
 	set_motor (2, speed);
 	
 	sleep1(delaySec, delayMicro);
@@ -51,11 +51,18 @@ int line_detection () {
 	
 	int rows = 320;
 	int col = 240;
+	int posCol = col - 10;
 	
-	int error = 60;
-	int speed = 50;
-	int delayMicro = 16666;
+	int CI = 40;
+	int speed = 40;
+	double kp = 0.4;
+	
+	int delayMicro = 8333;
 	int delaySec = 0;
+	
+	int dv;
+	int sLeft;
+	int sRight;
 	
 	
 	while(true){
@@ -64,9 +71,9 @@ int line_detection () {
 		
 		for(int i=0; i < rows; i++){ // the left half of the image is negative and the right is positive numbers
 				
-				Red = get_pixel(col/2, i, 0); // gets the RED
-				Green = get_pixel(col/2, i, 1); // gets the GREEN
-				Blue = get_pixel(col/2, i, 2); // gets the BLUE
+				Red = get_pixel(col - posCol, i, 0); // gets the RED
+				Green = get_pixel(col - posCol, i, 1); // gets the GREEN
+				Blue = get_pixel(col - posCol, i, 2); // gets the BLUE
 				
 				White = (Red + Green + Blue)/3;
 				
@@ -88,37 +95,70 @@ int line_detection () {
 					LinePos -= WOrNot;
 					
 				}
-				
-				
-				
+
 			}
+		
+
+			dv = (LinePos*kp);
+			sLeft = speed + dv;
+			sRight = speed - dv;
 			
+			set_motor (1, sLeft);
+			set_motor (2, sRight);
+			
+			
+			//this stuff is temp
+			/**
 			if (LinePos > error) {
+				
+				speed = (LinePos * kp) + 100;
 				
 				turn_left(delayMicro, delaySec, speed);
 				cout << "LEFT \n";
+				
 			} else if (LinePos < (error*-1)){
+				
+				speed = ((LinePos*-1) * kp) + 100;
+				
 				turn_right(delayMicro, 0, speed);
 				cout << "RIGHT \n";
+				
 			} else {
 				go_straight(delayMicro, 0, speed);
 				cout << "STRAIGHT \n";
 			}
+			*/
+			//ends here
 			
 			cout << "LINE POS: " << LinePos << "\n";
 			LinePos = 0;
 			
 		}
 		return(0);	
-
+		
+		
+		
 	}
+	
+	int open_the_gate() {
+    		char server_addr[15] = "130.195.6.196";
+    		int port = 1024;
+    		char message[24] = "Please";
+		connect_to_server(server_addr, port);
+		send_to_server(message);
+		receive_from_server(message);
+    		send_to_server(message);
+    		return 0;
+	}
+	
 int main () {
 	
 
 
 	init();
-	
+	//open_the_gate();
 	line_detection();
+
 	
 	
 }
