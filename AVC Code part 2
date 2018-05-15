@@ -52,14 +52,15 @@ int line_detection () {
 	int rows = 320;
 	int col = 240;
 	
-	int CI = 80;
+	int error = 60;
 	int speed = 50;
-	int delayMicro = 10;
+	int delayMicro = 16666;
+	int delaySec = 0;
 	
 	
 	while(true){
 		
-		int take_picture(); // takes the picture
+		take_picture(); // takes the picture
 		
 		for(int i=0; i < rows; i++){ // the left half of the image is negative and the right is positive numbers
 				
@@ -88,24 +89,23 @@ int line_detection () {
 					
 				}
 				
-				//cout << "INDEX Pos: " << i << "\n";
-				//cout << " WHITE Value: " << White << "\n";
 				
 				
 			}
-			cout << "Line Pos: " << LinePos << "\n";
 			
-			if (LinePos > CI) {
+			if (LinePos > error) {
+				
+				turn_left(delayMicro, delaySec, speed);
+				cout << "LEFT \n";
+			} else if (LinePos < (error*-1)){
 				turn_right(delayMicro, 0, speed);
-				sleep1(delayMicro,0);
-			} else if (LinePos < (CI*-1)) {
-				turn_left(delayMicro, 0, speed);
-				sleep1(delayMicro,0);
+				cout << "RIGHT \n";
 			} else {
 				go_straight(delayMicro, 0, speed);
-				sleep1(delayMicro,0);
+				cout << "STRAIGHT \n";
 			}
 			
+			cout << "LINE POS: " << LinePos << "\n";
 			LinePos = 0;
 			
 		}
@@ -117,8 +117,6 @@ int main () {
 
 
 	init();
-
-	take_picture();
 	
 	line_detection();
 	
