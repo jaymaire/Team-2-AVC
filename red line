@@ -1,4 +1,4 @@
-int_stop (int delaySec, int delayMicro){ // waits for 3 seconds
+int stop (int delaySec, int delayMicro){ // waits for 3 seconds
 	sleep1(delaySec, delayMicro);
 	set_motor(1,0);
 	set_motor(2,0);
@@ -17,8 +17,7 @@ int delayMicro = 0; //temp
 
 int MinRed = 150; // minimum value for red
 int MaxGB = 100; // max value for green and blue
-boolean 
-ROrNot = false;
+boolean ROrNot = false;
 int LinePos = 0;
 
 int GateClosed = 50; // min value for how far gate is
@@ -38,18 +37,18 @@ Blue = get_pixel(col - posCol, i, 2); // gets the BLUE
 				
 if ((Red >= MinRed )&& (Green =< MaxGB) && (Blue =< MaxGB) ){
 	ROrNot = 1; // red line 
-	int_stop; 
+	stop; 
 	}
 	else{
-	ROrNot = 0; //not red 
+	ROrNot; //not red 
 	}
 } 
 	adc_reading = read_analog(0);
  
 if (ROrNot && adc_reading =< GateClosed){
 	for (adc_reading > GateClosed){ 
-		int_stop;
-		int
+		stop;
+		
 		}
 }
 }
