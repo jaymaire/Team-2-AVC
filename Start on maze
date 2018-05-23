@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <time.h>
+#include "E101.h"
+
+int speed = 40;
+double
+
+
+
+int turn90Left(){
+    set_motor(1, speed);
+    set_motor(2, -speed);
+    sleep1(1, 0);
+    set_motor(1, 0);
+    set_motor(2, 0);
+    return 0;
+}
+
+int turn90Right(){
+    set_motor(1, -speed);
+    set_motor(2, speed);
+    sleep1(1, 0);
+    set_motor(1, 0);
+    set_motor(2, 0);
+    return 0;
+}
+
+bool detectOrange(){
+    //all the shit for detecting orange
+    return true;
+}
+int periodicGate(){
+    return 0;
+}
+
+int maintainCourse(bool leftOrRight, int difference){
+    double speedAdjustmentLeft = 1;
+    double speedAdjustmentRight = 1;
+    if(difference < 20){
+        set_motor(0, speed*speedAdjustmentLeft);
+        set_motor(1, speed*speedAdjustmentRight);
+        return 0;
+    }else if (difference < 50){
+
+    }
+}
+
+int doMaze(){
+    bool whileMazing = true;
+    while (whileMazing) {
+        int front = read_analog(0); // Front IR sensor
+        int left = read_analog(1); // Left IR sensor
+        int right = read_analog(2); // Right IR sensor
+        if (detectOrange()) {
+            periodicGate();
+        }
+        int difference;
+        bool leftOrRight; //True = right False = left
+        if(front > 400){
+            //when you hit a wall
+        }else if (left > right){ //needs to turn left
+            difference = left - right;
+            leftOrRight = false;
+            maintainCourse(leftOrRight, difference);
+        }else if(left < right){ // needs to turn right
+            difference = right - left;
+            leftOrRight = true;
+            maintainCourse(leftOrRight, difference);
+        }else {
+            maintainCourse(true, 0);
+        }
+
+    }
+    return 0;
+}
+
+
+
+int main() {
+    init();
+    if (detectOrange()){
+        doMaze();
+    }
+    return 0;
+}
