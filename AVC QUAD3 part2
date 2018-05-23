@@ -22,8 +22,8 @@ int open_the_gate() {
 
 int turn_left90(){
 
-    set_motor (1, 75);
-    set_motor (2, -75);
+    set_motor (1, 70);
+    set_motor (2, -70);
 
     sleep1(0, 444444);
     set_motor (1,0);
@@ -33,10 +33,10 @@ int turn_left90(){
 
 int turn_right90(){
 
-    set_motor (1, -50);
-    set_motor (2, 50);
+    set_motor (1, -70);
+    set_motor (2, 70);
 
-    sleep1(0, 484444);
+    sleep1(0, 444444);
     set_motor (1,0);
     set_motor (2,0);
     return 0;
@@ -47,7 +47,7 @@ int go_Straight(){
     set_motor (1, 50);
     set_motor (2, 50);
 
-    sleep1(0, 644444);
+    sleep1(0, 544444);
     set_motor (1,0);
     set_motor (2,0);
     return 0;
@@ -144,11 +144,23 @@ int line_Maze () {
     int Green = 0; //this is the value of the Green pixel
     int Blue = 0; //this is the value of the Blue pixel
     int White = 0; //this is the overall white value
+    
+    int LeftRed = 0; //this is the value of the rex pixel
+    int LeftGreen = 0; //this is the value of the Green pixel
+    int LeftBlue = 0; //this is the value of the Blue pixel
+    int LeftWhite = 0; //this is the overall white value
+
+    int RightRed = 0; //this is the value of the rex pixel
+    int RightGreen = 0; //this is the value of the Green pixel
+    int RightBlue = 0; //this is the value of the Blue pixel
+    int RightWhite = 0; //this is the overall white value
 
     int MinWhite = 100; // all values over this is considered white
 
     int WOrNot; // if the pixel is white its a 1 if not its a 0
     int WOrBTotal; //this is the over all amout of white in the pic 360 would be all white 0 would be all black
+    int LeftWOrBTotal; //this is the over all amout of white in the pic 360 would be all white 0 would be all black
+    int RightWOrBTotal; //this is the over all amout of white in the pic 360 would be all white 0 would be all black
     int WOrBMin = 40; //if there are less than <<< then it will be considered all black
     int WOrBMax = 200; //if there is over <<<< then it will be considered all white
 
@@ -171,6 +183,8 @@ int line_Maze () {
     while(DoLineMaze){
         take_picture(); // takes the picture
 
+
+//for the middle of the picture
         for(int i=0; i < rows; i++){ // the left half of the image is negative and the right is positive numbers
             Red = get_pixel(col - posCol, i, 0); // gets the RED
             Green = get_pixel(col - posCol, i, 1); // gets the GREEN
@@ -191,6 +205,29 @@ int line_Maze () {
                 LinePos -= WOrNot; //takes one from the white pos
             }
         }
+        
+//for the left side of the picture
+	for(int i=0; i < col; i++){ // the left half of the image is negative and the right is positive numbers
+            LeftRed = get_pixel(i, rows/4, 0); // gets the RED
+            LeftGreen = get_pixel(i, rows/4, 1); // gets the GREEN
+            LeftBlue = get_pixel(i, rows/4, 2); // gets the BLUE
+            LeftWhite = get_pixel(LeftRed + LeftGreen + LeftBlue)/3; //this is the white value
+            if (LeftWhite >= MinWhite) { //if the pixel is white
+                LeftWOrBTotal += 1;
+            } 
+        }
+        
+//for the right side of the picture
+	for(int i=0; i < col; i++){ // the left half of the image is negative and the right is positive numbers
+            RightRed = get_pixel(i, rows-(rows/4), 0); // gets the RED
+            RightGreen = get_pixel(i, rows-(rows/4), 1); // gets the GREEN
+            RightBlue = get_pixel(i, rows-(rows/4), 2); // gets the BLUE
+            RightWhite = (RightRed + RightGreen + RightBlue)/3; //this is the white value
+            if (RightWhite >= MinWhite) { //if the pixel is white
+                RightWOrBTotal += 1;
+            } 
+        }
+             
         //this will work out the speed of the motors
         dv = (LinePos*kp);
         sLeft = speed + dv;
@@ -200,34 +237,38 @@ int line_Maze () {
             sLeft += 20;
             sRight += 20;
         }
-
+        
+        
+        
         if (WOrBTotal <= WOrBMin) { // if its majority black
-            if (!previousTurn) {
-                turn_left90();
-                previousTurn = true;
-            } else if (previousTurn) {
+            if (LeftWOrBTotal > MinWhite/2 && RightWOrBTotal < MinWhite/2) {
+                turn_left90();     
+            } else if (LeftWOrBTotal < MinWhite/2 && RightWOrBTotal > MinWhite/2) {
                 turn_right90();
-                turn_right90();
-                previousTurn = false;
-            }
+            } else {
+				turn_right90();
+				turn_right90();
+			}
         } else if (WOrBTotal > WOrBMin && WOrBTotal <= WOrBMax) { //if its on the line
             set_motor (1, sLeft);
             set_motor (2, sRight);
             cout << "GO FORWARD W OR B TOTAL " << WOrBTotal << "\n";
         } else { //if it s mostly white
-            if (!previousTurn) {
-                turn_left90();
-                previousTurn = true;
-            } else if (previousTurn) {
+            if (LeftWOrBTotal > MinWhite/2 && RightWOrBTotal < MinWhite/2) {
+                turn_left90();     
+            } else if (LeftWOrBTotal < MinWhite/2 && RightWOrBTotal > MinWhite/2) {
                 turn_right90();
-                turn_right90();
-                previousTurn = false;
-            }
+            } else {
+				turn_right90();
+				turn_right90();
+			}
         }
 
         cout << "LINE POS: " << LinePos << "\n";
         LinePos = 0;
         WOrBTotal = 0;
+        LeftWOrBTotal = 0;
+        RightWOrBTotal = 0;
     }
     return(0);
 }
