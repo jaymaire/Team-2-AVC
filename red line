@@ -21,7 +21,6 @@ boolean ROrNot = false;
 int LinePos = 0;
 
 int GateClosed = 50; // min value for how far gate is
-bool go = true;
 
 int rows = 320;
 int col = 240;
@@ -36,7 +35,7 @@ Green = get_pixel(col - posCol, i, 1); // gets the GREEN
 Blue = get_pixel(col - posCol, i, 2); // gets the BLUE
 				
 if ((Red >= MinRed )&& (Green =< MaxGB) && (Blue =< MaxGB) ){
-	ROrNot = 1; // red line 
+	ROrNot = true; // red line 
 	stop; 
 	}
 	else{
@@ -45,12 +44,12 @@ if ((Red >= MinRed )&& (Green =< MaxGB) && (Blue =< MaxGB) ){
 } 
 	adc_reading = read_analog(0);
  
-if (ROrNot && adc_reading =< GateClosed){
+if (ROrNot == true && adc_reading =< GateClosed){
 	for (adc_reading > GateClosed){ 
 		stop;
-		
+		go_straight;
 		}
-}
+	}
 }
 
 	
