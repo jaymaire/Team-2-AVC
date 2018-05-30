@@ -1,0 +1,377 @@
+#include <stdio.h>
+#include <time.h>
+#include "E101.h"
+#include <iostream>
+using namespace std;
+
+bool DoWindyLine = true;
+bool DoLineMaze = true;
+bool doWallMaze = true;
+
+int open_the_gate() {
+    char server_addr[15] = "130.195.6.196";
+    int port = 1024;
+    char message[24] = "Please";
+
+    connect_to_server(server_addr, port);
+    send_to_server(message);
+    receive_from_server(message);
+    send_to_server(message);
+    return 0;
+}
+
+
+int turn_left90(){
+
+    set_motor (1, 50);
+    set_motor (2, -50);
+
+    sleep1(0, 474444);
+    set_motor (1,0);
+    set_motor (2,0);
+    return 0;
+}
+
+int turn_right90(){
+
+    set_motor (1, -50);
+    set_motor (2, 50);
+
+    sleep1(0, 474444);
+    set_motor (1,0);
+    set_motor (2,0);
+    return 0;
+}
+
+int go_Straight(){
+
+    set_motor (1, 47);
+    set_motor (2, 47);
+
+    sleep1(0, 544444);
+    set_motor (1,0);
+    set_motor (2,0);
+    return 0;
+}
+
+int turn_180(){
+
+    set_motor (1, 50);
+    set_motor (2, -50);
+
+    sleep1(0, 744444);
+    set_motor (1,0);
+    set_motor (2,0);
+    return 0;
+}
+
+
+int line_detection () {
+
+    int Red = 0; //this is the value of the rex pixel
+    int Green = 0; //this is the value of the Green pixel
+    int Blue = 0; //this is the value of the Blue pixel
+    int White = 0; //this is the overall white value
+
+    int MinWhite = 100; // all values over this is considered white
+
+    int WOrNot = 0; // if the pixel is white its a 1 if not its a 0
+    int WOrBTotal = 0; //this is the over all amout of white in the pic 360 would be all white 0 would be all black
+    int WOrBMin = 40; //if there are less than <<< then it will be considered all black
+    int WOrBMax = 200; //if there is over <<<< then it will be considered all white
+    
+
+    int LinePos = 0; //if its a negative the line is left if positive the line is right
+    int LineMid = 20; //this is the value that the line will be considered in the middle
+
+    int rows = 320; //this is howmany rows
+    int col = 240; //this is the colls
+    int posCol = col/2; //this is where to scan
+
+    int speed = 40; //speed that the robot will go
+    double kp = 0.37; //this is the value to work out the speed the higher this is the tighter turns it can do but it will look like its on crack
+
+    int dv = 0; //this is the difference in V between the wheels
+    int sLeft = 0; //this is the speed of the left motor
+    int sRight = 0; //this is the speed of the right motor
+
+
+    while(DoWindyLine){
+        take_picture(); // takes the picture
+
+        for(int i=0; i < rows; i++){ // the left half of the image is negative and the right is positive numbers
+            Red = get_pixel(posCol, i, 0); // gets the RED
+            Green = get_pixel(posCol, i, 1); // gets the GREEN
+            Blue = get_pixel(posCol, i, 2); // gets the BLUE
+            White = (Red + Green + Blue)/3; //this is the white value
+
+            if (White >= MinWhite) { //if the pixel is white
+                WOrNot = 1; //the pixel is white
+                WOrBTotal = WOrBTotal + 1;
+
+            } else { // if the pixel is not white
+                WOrNot = 0; //the pixel is not white
+            }
+
+            //this will work out where the line is if its pos then its on the left if its on the right it will be negative
+            if (i < rows/2) { // if it is on the left side
+                LinePos += WOrNot; //if its on the left it adds one to the white pos
+            } else {
+                LinePos -= WOrNot; //takes one from the white pos
+            }
+        }
+        //this will work out the speed of the motors
+        dv = (LinePos*kp);
+        sLeft = speed + dv;
+        sRight = speed - dv;
+
+        if (LinePos < LineMid && LinePos > (LineMid*-1)) { //if it is going straight then it will increase the speed
+            sLeft += 20;
+            sRight += 20;
+        }
+
+        if (WOrBTotal <= WOrBMin) { // if its majority black then go back
+            set_motor (1, sLeft*(-1));
+            set_motor (2, sRight*(-1));
+
+        } else if (WOrBTotal > WOrBMin && WOrBTotal <= WOrBMax) { //if its on the line
+            set_motor (1, sLeft);
+            set_motor (2, sRight);
+            
+        } else if (WOrBTotal > WOrBMax){ //if its mostly white stop (its at the end of the line (where it cahnges from wiggly line to straight))
+            DoWindyLine = false;
+        } else {
+			cout << "ERROR ON THE WIGGLY LINE" << "\n";
+		}
+
+        
+        LinePos = 0;
+        WOrBTotal = 0;
+    }
+    return(0);
+}
+
+	
+
+
+
+int line_Maze () {
+
+    int Red = 0; //this is the value of the rex pixel
+    int Green = 0; //this is the value of the Green pixel
+    int Blue = 0; //this is the value of the Blue pixel
+    int White = 0; //this is the overall white value
+    
+    int LeftRed = 0; //this is the value of the rex pixel
+    int LeftGreen = 0; //this is the value of the Green pixel
+    int LeftBlue = 0; //this is the value of the Blue pixel
+    int LeftWhite = 0; //this is the overall white value
+
+    int RightRed = 0; //this is the value of the rex pixel
+    int RightGreen = 0; //this is the value of the Green pixel
+    int RightBlue = 0; //this is the value of the Blue pixel
+    int RightWhite = 0; //this is the overall white value
+
+    int MinWhite = 120; // all values over this is considered white
+
+    int WOrNot; // if the pixel is white its a 1 if not its a 0
+    int WOrBTotal; //this is the over all amout of white in the pic 360 would be all white 0 would be all black
+    int LeftWOrBTotal; //this is the over all amout of white in the pic 360 would be all white 0 would be all black
+    int RightWOrBTotal; //this is the over all amout of white in the pic 360 would be all white 0 would be all black
+    int WOrBMin = 20; //if there are less than <<< then it will be considered all black
+    int WOrBMax = 200; //if there is over <<<< then it will be considered all white
+
+    int LinePos = 0; //if its a negative the line is left if positive the line is right
+    int LineMid = 20; //this is the value that the line will be considered in the middle
+
+    int rows = 320; //this is howmany rows
+    int col = 240; //this is the colls
+    int posCol = col/2; //this is where to scan
+
+    int speed = 40; //speed that the robot will go
+    double kp = 0.20; //this is the value to work out the speed the higher this is the tighter turns it can do but it will look like its on crack
+
+    int dv; //this is the difference in V between the wheels
+    int sLeft; //this is the speed of the left motor
+    int sRight; //this is the speed of the right motor
+
+	int TotalRed;
+	int TotalGreen;
+	int TotalBlue;
+	
+	
+    while(DoLineMaze){
+        take_picture(); // takes the picture
+
+
+//for the middle of the picture
+        for(int i=rows/8; i < rows - rows/8; i++){ // the left half of the image is negative and the right is positive numbers
+            Red = get_pixel(posCol, i, 0); // gets the RED
+            Green = get_pixel(posCol, i, 1); // gets the GREEN
+            Blue = get_pixel(posCol, i, 2); // gets the BLUE
+            White = (Red + Green + Blue)/3; //this is the white value
+
+			TotalRed += Red;
+			TotalGreen += Green;
+			TotalBlue += Blue;
+			
+            if (White >= MinWhite) { //if the pixel is white
+                WOrNot = 1; //the pixel is white
+                WOrBTotal += 1;
+            } else { // if the pixel is not white
+                WOrNot = 0; //the pixel is not white
+            }
+
+            //this will work out where the line is if its pos then its on the left if its on the right it will be negative
+            if (i < rows/2) { // if it is on the left side
+                LinePos += WOrNot; //if its on the left it adds one to the white pos
+            } else {
+                LinePos -= WOrNot; //takes one from the white pos
+            }
+        }
+        
+        TotalRed = TotalRed/rows;
+        TotalGreen = TotalGreen/rows;
+        TotalBlue = TotalBlue/rows;
+        
+//for the left side of the picture
+	for(int i=0; i < col; i++){ // the left half of the image is negative and the right is positive numbers
+            LeftRed = get_pixel(i, rows/4, 0); // gets the RED
+            LeftGreen = get_pixel(i, rows/4, 1); // gets the GREEN
+            LeftBlue = get_pixel(i, rows/4, 2); // gets the BLUE
+            LeftWhite = (LeftRed + LeftGreen + LeftBlue)/3; //this is the white value
+            if (LeftWhite >= MinWhite) { //if the pixel is white
+                LeftWOrBTotal += 1;
+            } 
+        }
+        
+//for the right side of the picture
+	for(int i=0; i < col; i++){ // the left half of the image is negative and the right is positive numbers
+            RightRed = get_pixel(i, rows-(rows/4), 0); // gets the RED
+            RightGreen = get_pixel(i, rows-(rows/4), 1); // gets the GREEN
+            RightBlue = get_pixel(i, rows-(rows/4), 2); // gets the BLUE
+            RightWhite = (RightRed + RightGreen + RightBlue)/3; //this is the white value
+            if (RightWhite >= MinWhite) { //if the pixel is white
+                RightWOrBTotal += 1;
+            } 
+        }
+             
+        //this will work out the speed of the motors
+        dv = (LinePos*kp);
+        sLeft = speed + dv;
+        sRight = speed - dv;
+
+        if (LinePos < LineMid && LinePos > (LineMid*-1)) { //if it is going straight then it will increase the speed
+            sLeft += 10;
+            sRight += 10;
+        }
+        
+       
+		
+        if (read_analog(0) > 300 && read_analog(2) > 300) {
+			DoLineMaze = false;
+		}
+        
+        if (WOrBTotal <= WOrBMin) { // if its majority black
+            if (LeftWOrBTotal > WOrBMin) {
+                turn_left90();     
+            } else if (RightWOrBTotal > WOrBMin) {
+                turn_right90();
+            } else {
+				turn_180();
+			}
+        } else if (WOrBTotal > WOrBMin && WOrBTotal <= WOrBMax) { //if its on the line
+            set_motor (1, sLeft);
+            set_motor (2, sRight);
+		} else {
+			set_motor (1, sLeft);
+            set_motor (2, sRight);
+		}
+
+       
+        LinePos = 0;
+        WOrBTotal = 0;
+        LeftWOrBTotal = 0;
+        RightWOrBTotal = 0;
+    }
+    return(0);
+}
+
+int wallMaze(){
+    int speed = 40;		//Set speed
+    double kp = 0.2;		// Constant for tuning the robots turning adjustments
+    int frontThreshold = 600;  //Value at which robot will turn to avoid collision
+    int diffTolerance = 25;		//Min diff of side sensors for adjustment
+    while (doWallMaze) {
+        int leftSensor = read_analog(0);
+        int frontSensor = read_analog(1);
+        int rightSensor = read_analog(2);
+        
+        sleep1(1,0);
+        cout << "LEFT: " << leftSensor << " FRONT: " << frontSensor << " RIGHT: " << rightSensor << "\n";
+        
+        if (frontSensor > frontThreshold) { //If collision imminent
+            if (leftSensor > rightSensor) {
+                set_motor(1, -20);
+                set_motor(2, -30);
+                cout << "LEFT: \n";
+            } else {
+                set_motor(1, -30);
+                set_motor(2, -20);
+                cout << "RIGHT \n";
+            }
+            sleep1(0, 100000);
+            continue;
+        }
+        int sensorDiff = leftSensor - rightSensor;
+        if (sensorDiff > diffTolerance || sensorDiff < -diffTolerance) {
+            sensorDiff = 0;		//If diff is tolerable motor speeds are equal
+        }
+        double dv = sensorDiff*kp;
+        double negdvspeed = speed - dv;
+        double posdvspeed = speed + dv;
+        if (leftSensor > rightSensor){
+            set_motor(1, (int)negdvspeed);
+            set_motor(2, (int)posdvspeed);
+        } else{
+            set_motor(1, (int)posdvspeed);
+            set_motor(2, (int)negdvspeed);
+        }
+    }
+    return 0;
+}
+
+
+int main () {
+
+    DoWindyLine = true;
+    DoLineMaze = true;
+    doWallMaze = true;
+	
+    init();
+    
+
+	
+    open_the_gate();
+    
+    cout << "Gate Opened" << "\n";
+    
+	line_detection();
+	
+	set_motor(1, 60);
+	set_motor(2, 60);
+	sleep1(0, 250000);
+
+    cout << "all white detected Moving to Line Maze" << "\n";
+    line_Maze();
+    set_motor(1, 120);
+    set_motor(2, 130);
+    
+    cout << "Line Maze Finished" << "\n";
+    
+	wallMaze();
+	
+	cout << "Wall maze Finished" << "\n";
+	
+}
+
